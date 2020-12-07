@@ -17,6 +17,7 @@
       ;; ["" :items]
       ["/:task-id" :task]]
      ["/click-counter" :click-counter]
+     ["/temperature-converter" :temperature-converter]
      ["/about" :about]]))
 
 (defn path-for [route & [params]]
@@ -30,10 +31,12 @@
 (defn home-page []
   (fn []
     [:span.main
-     [:h1 "Welcome to seven-tasks"]
+     [:h1 "Seven-tasks"]
      [:ul
       [:li {:name "Click Counter" :key "task-1"}
-       [:a {:href (path-for :click-counter)} "Task 1, click Counter"]]
+       [:a {:href (path-for :click-counter)} "Task 1, Click Counter"]]
+      [:li {:name "Temperature Converter" :key "task-2"}
+       [:a {:href (path-for :temperature-converter)} "Task 2, Temperature Converter"]]
       (map (fn [task-id]
              [:li {:name (str "task-" task-id) :key (str "task-" task-id)}
               [:a {:href (path-for :task {:task-id task-id})} "Task: " task-id]])
@@ -57,11 +60,30 @@
        [:input {:type "button"
                 :value "Click me"
                 :on-click #(swap! clicks inc)}]
-       [:p [:a {:href (path-for :tasks)} "Back to the list of tasks"]]])))
+       [:p [:a {:href (path-for :index)} "Back to the list of tasks"]]])))
+
+(defn c->f [centigrade]
+  (+ 32 (* (/ 9 5) centigrade)))
+
+(defn f->c [farenheit]
+  (* (/ 5 9) (- farenheit 32)))
+
+(defn temperature-converter-page []
+  (let [temperature-centigrade (reagent/atom 0)]
+    (fn []
+      [:span.main
+       [:h1 "Task 2, Temperature Converter"]
+       [:p "Convert Centigrade to Farenheit and vice versa"]
+       [:input {:type "text"
+                :value @temperature-centigrade
+                :on-change #(reset! temperature-centigrade (-> % .-target .-value))}]
+       [:p @temperature-centigrade " Centigrade"]
+       [:p (c->f @temperature-centigrade) " Farenheit"]])))
 
 (defn about-page []
   (fn [] [:span.main
-         [:h1 "About seven-tasks"]]))
+         [:h1 "Seven-tasks"]
+         [:p "Test tasks, solved by Iain Wood"]]))
 
 
 ;; -------------------------
@@ -71,9 +93,9 @@
   (case route
     :index #'home-page
     :about #'about-page
-    ;; :tasks #'tasks-page
     :task #'task-page
-    :click-counter #'click-counter-page))
+    :click-counter #'click-counter-page
+    :temperature-converter #'temperature-converter-page))
 
 
 ;; -------------------------
@@ -100,18 +122,18 @@
 (defn init! []
   (clerk/initialize!)
   (accountant/configure-navigation!
-   {:nav-handler
-    (fn [path]
-      (let [match (reitit/match-by-path router path)
-            current-page (:name (:data  match))
-            route-params (:path-params match)]
-        (reagent/after-render clerk/after-render!)
-        (session/put! :route {:current-page (page-for current-page)
-                              :route-params route-params})
-        (clerk/navigate-page! path)
-        ))
-    :path-exists?
-    (fn [path]
-      (boolean (reitit/match-by-path router path)))})
+    {:nav-handler
+     (fn [path]
+       (let [match (reitit/match-by-path router path)
+             current-page (:name (:data  match))
+             route-params (:path-params match)]
+         (reagent/after-render clerk/after-render!)
+         (session/put! :route {:current-page (page-for current-page)
+                               :route-params route-params})
+         (clerk/navigate-page! path)
+         ))
+     :path-exists?
+     (fn [path]
+       (boolean (reitit/match-by-path router path)))})
   (accountant/dispatch-current!)
   (mount-root))
