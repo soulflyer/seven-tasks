@@ -12,11 +12,12 @@
 
 (def router
   (reitit/router
-   [["/" :index]
-    ["/items"
-     ["" :items]
-     ["/:item-id" :item]]
-    ["/about" :about]]))
+    [["/" :index]
+     ["/tasks"
+      ;; ["" :items]
+      ["/:task-id" :task]]
+     ["/click-counter" :click-counter]
+     ["/about" :about]]))
 
 (defn path-for [route & [params]]
   (if params
@@ -31,33 +32,36 @@
     [:span.main
      [:h1 "Welcome to seven-tasks"]
      [:ul
-      [:li [:a {:href (path-for :items)} "Items of seven-tasks"]]
-      [:li [:a {:href "/broken/link"} "Broken link"]]]]))
+      [:li {:name "Click Counter" :key "task-1"}
+       [:a {:href (path-for :click-counter)} "Task 1, click Counter"]]
+      (map (fn [task-id]
+             [:li {:name (str "task-" task-id) :key (str "task-" task-id)}
+              [:a {:href (path-for :task {:task-id task-id})} "Task: " task-id]])
+           (range 2 8))]]))
 
 
-
-(defn items-page []
-  (fn []
-    [:span.main
-     [:h1 "The items of seven-tasks"]
-     [:ul (map (fn [item-id]
-                 [:li {:name (str "item-" item-id) :key (str "item-" item-id)}
-                  [:a {:href (path-for :item {:item-id item-id})} "Item: " item-id]])
-               (range 1 60))]]))
-
-
-(defn item-page []
+(defn task-page []
   (fn []
     (let [routing-data (session/get :route)
-          item (get-in routing-data [:route-params :item-id])]
+          task (get-in routing-data [:route-params :task-id])]
       [:span.main
-       [:h1 (str "Item " item " of seven-tasks")]
-       [:p [:a {:href (path-for :items)} "Back to the list of items"]]])))
+       [:h1 (str "Task " task " of seven-tasks")]
+       [:p [:a {:href (path-for :tasks)} "Back to the list of tasks"]]])))
 
+(defn click-counter-page []
+  (let [clicks (reagent/atom 0)]
+    (fn []
+      [:span.main
+       [:h1 "Task 1, Click Counter"]
+       [:p "There have been " @clicks " clicks"]
+       [:input {:type "button"
+                :value "Click me"
+                :on-click #(swap! clicks inc)}]
+       [:p [:a {:href (path-for :tasks)} "Back to the list of tasks"]]])))
 
 (defn about-page []
   (fn [] [:span.main
-          [:h1 "About seven-tasks"]]))
+         [:h1 "About seven-tasks"]]))
 
 
 ;; -------------------------
@@ -67,8 +71,9 @@
   (case route
     :index #'home-page
     :about #'about-page
-    :items #'items-page
-    :item #'item-page))
+    ;; :tasks #'tasks-page
+    :task #'task-page
+    :click-counter #'click-counter-page))
 
 
 ;; -------------------------
