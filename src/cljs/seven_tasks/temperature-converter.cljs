@@ -11,7 +11,7 @@
 
 (defn page []
   (let [temperature-centigrade (r/atom 0)
-        temperature-farenheit  (r/atom 0)]
+        temperature-farenheit  (r/atom 32)]
     (fn []
       [:span.main
        [:h1 "Task 2, Temperature Converter"]

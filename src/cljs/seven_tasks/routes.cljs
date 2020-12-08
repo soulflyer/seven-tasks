@@ -9,6 +9,7 @@
       ["/:task-id" :task]]
      ["/click-counter" :click-counter]
      ["/temperature-converter" :temperature-converter]
+     ["/flight-booker" :flight-booker]
      ["/about" :about]]))
 
 (defn path-for [route & [params]]

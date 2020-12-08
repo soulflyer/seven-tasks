@@ -8,6 +8,7 @@
    [reitit.frontend :as reitit]
    [seven-tasks.about :as about]
    [seven-tasks.click-counter :as click-counter]
+   [seven-tasks.flight-booker :as flight-booker]
    [seven-tasks.home :as home]
    [seven-tasks.routes :as routes]
    [seven-tasks.temperature-converter :as temperature-converter]))
@@ -30,7 +31,8 @@
     :about #'about/page
     :task #'task-page
     :click-counter #'click-counter/page
-    :temperature-converter #'temperature-converter/page))
+    :temperature-converter #'temperature-converter/page
+    :flight-booker #'flight-booker/page))
 
 
 ;; -------------------------
